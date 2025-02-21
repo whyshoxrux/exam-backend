@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -24,16 +24,23 @@ export class UsersService {
     return user;
   }
 
-  createMany(createUserDto: CreateUserDto[]){
-    return this.userModel.bulkCreate(createUserDto)
+  createMany(createUserDto: CreateUserDto[]) {
+    return this.userModel.bulkCreate(createUserDto);
   }
 
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
     const user = await this.userModel.findOne({ where: { email } });
 
+    console.log(user);
+
+    // User ni bor yoki yo'qligi tekshirildi! Abdurazzoq :)
+    if (user == null || user.password != password)
+      throw new NotFoundException({ message: 'User not found', status: 404 });
+
     const accessToken = this.generateAccessToken({ id: user.id });
-    return { accessToken };
+
+    return { accessToken, user, status: 200 };
   }
 
   async findAll() {
@@ -43,8 +50,6 @@ export class UsersService {
   }
 
   async getMe(userId: number) {
-    console.log(1234);
-    
     const user = await this.userModel.findOne({
       where: { id: userId },
       include: [{ model: Orders }, { model: Cart }, { model: Reviews }],
@@ -74,7 +79,7 @@ export class UsersService {
 
   private generateAccessToken(data) {
     return jwt.sign({ data }, this.configService.get('JWT_ACCESS_SECRET'), {
-      expiresIn: '8h',
+      expiresIn: '100h',
     });
   }
 }

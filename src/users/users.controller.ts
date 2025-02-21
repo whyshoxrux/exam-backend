@@ -26,7 +26,7 @@ import { RoleGuard } from 'src/common/auth/role.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
+  @Post('register')
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -37,8 +37,8 @@ export class UsersController {
   }
 
   @Post('create-many')
-  @Roles('admin')
-  @UseGuards(RoleGuard)
+  // @Roles('admin')
+  // @UseGuards(RoleGuard)
   createMany(@Body() createUserDto: CreateUserDto[]) {
     return this.usersService.createMany(createUserDto);
   }
@@ -52,7 +52,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Get('me')
   async getMe(@Req() req) {
-    const userId = req.user.data.id;
+    const userId = req.user.id;
 
     return this.usersService.getMe(userId);
   }

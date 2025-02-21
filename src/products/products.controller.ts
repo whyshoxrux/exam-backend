@@ -11,6 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import { ProductsService } from './products.service';
@@ -28,8 +29,6 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @UseGuards(AuthGuard)
-  @Roles('admin')
-  @UseGuards(RoleGuard)
   @Post()
   @UseInterceptors(
     FileInterceptor('product_image', {
@@ -38,16 +37,15 @@ export class ProductsController {
         filename: (req, file, callback) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
-
           const ext = extname(file.originalname);
           const filename = `product-${uniqueSuffix}${ext}`;
           callback(null, filename);
         },
       }),
       fileFilter: (req, file, callback) => {
-        if (!file.mimetype.match(/(jpg|pdf|jpeg|image\/png)/)) {
+        if (!file.mimetype.match(/^image\/(jpeg|jpg|png|webp)$/)) {
           return callback(
-            new Error('Only jpg,pdf,jpeg,image,png are allowed!'),
+            new BadRequestException('Only jpg, jpeg, png files are allowed!'),
             false,
           );
         }
@@ -61,28 +59,32 @@ export class ProductsController {
     @Req() req,
   ) {
     try {
-      const userId = req.cart.id;
-
       if (!image) {
-        return { message: 'No file provided!' };
+        throw new BadRequestException('No file provided!');
       }
 
       createProductDto.product_image = `/uploads/${image.filename}`;
-      createProductDto.cart_id = userId;
 
-      const saveDocument = await this.productsService.create(createProductDto);
+      const userId = req.user?.id;
+      if (!userId) {
+        throw new BadRequestException('User ID not found');
+      }
+
+      // Mahsulotni saqlash
+      const savedProduct = await this.productsService.create(createProductDto);
 
       return {
-        message: 'Bank document uploaded successfully',
-        document: saveDocument,
+        message: 'Product image uploaded successfully',
+        product: savedProduct,
       };
     } catch (error) {
-      return { message: 'Error uploading image', error: error.message };
+      throw new BadRequestException(`Error uploading image: ${error.message}`);
     }
   }
+
   @Post('create-many')
-  @Roles('admin')
-  @UseGuards(RoleGuard)
+  // @Roles('admin')
+  // @UseGuards(RoleGuard)
   createMany(@Body() createProductDto: CreateProductDto[]) {
     return this.productsService.createMany(createProductDto);
   }
