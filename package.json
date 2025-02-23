@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prestart": "npm run build",
+    "migrate": "sequelize db:migrate",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
