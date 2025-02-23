@@ -4,6 +4,7 @@ import { CreateOrderItemDto } from './dto/create-order_item.dto';
 import { UpdateOrderItemDto } from './dto/update-order_item.dto';
 import { Roles } from 'src/common/auth/role.decorator';
 import { RoleGuard } from 'src/common/auth/role.guard';
+import { AuthGuard } from 'src/common/auth/auth.guard';
 
 @Controller('order-items')
 export class OrderItemsController {
@@ -15,8 +16,8 @@ export class OrderItemsController {
   }
 
   @Post('create-many')
-  // @Roles('admin')
-  // @UseGuards(RoleGuard)
+  @Roles('admin')
+  @UseGuards(AuthGuard)
   createMany(@Body() createUserDto: CreateOrderItemDto[]) {
     return this.orderItemsService.createMany(createUserDto);
   }

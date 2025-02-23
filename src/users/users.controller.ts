@@ -20,7 +20,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Roles } from 'src/common/auth/role.decorator';
-import { RoleGuard } from 'src/common/auth/role.guard';
 
 @Controller('users')
 export class UsersController {
@@ -37,14 +36,15 @@ export class UsersController {
   }
 
   @Post('create-many')
-  // @Roles('admin')
-  // @UseGuards(RoleGuard)
+  @Roles('admin')
+  @UseGuards(AuthGuard)
   createMany(@Body() createUserDto: CreateUserDto[]) {
     return this.usersService.createMany(createUserDto);
   }
 
   @Get()
   @Roles('admin')
+  @UseGuards(AuthGuard)
   findAll() {
     return this.usersService.findAll();
   }
@@ -58,7 +58,7 @@ export class UsersController {
   }
 
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
@@ -95,7 +95,7 @@ export class UsersController {
     @Req() req,
   ) {
     try {
-      const userId = req.user.data.id;
+      const userId = req.user.id;
 
       if (userId != id) {
         return { message: 'You are not authorized to update this profile' };
@@ -119,7 +119,7 @@ export class UsersController {
   }
 
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);

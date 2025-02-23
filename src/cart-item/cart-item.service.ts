@@ -8,7 +8,6 @@ import { Products } from 'src/products/products.model';
 
 @Injectable()
 export class CartItemsService {
-
   constructor(@InjectModel(CartItem) private cartItemModel: typeof CartItem) {}
 
   create(createCartItemDto: CreateCartItemDto) {
@@ -19,12 +18,25 @@ export class CartItemsService {
     return this.cartItemModel.bulkCreate(createCartItemDto);
   }
 
+  async getMine(cartItemId: number) {
+    const cartItems = await this.cartItemModel.findOne({
+      where: { id: cartItemId },
+      include: [{ model: Cart }, { model: Products }],
+    });
+
+    return cartItems;
+  }
+
   findAll() {
-    return this.cartItemModel.findAll({include: [{model: Cart}, {model: Products}]});
+    return this.cartItemModel.findAll({
+      include: [{ model: Cart }, { model: Products }],
+    });
   }
 
   findOne(id: number) {
-    return this.cartItemModel.findByPk(id, {include: [{model: Cart}, {model: Products}]});
+    return this.cartItemModel.findByPk(id, {
+      include: [{ model: Cart }, { model: Products }],
+    });
   }
 
   update(id: number, updateCartItemDto: UpdateCartItemDto) {

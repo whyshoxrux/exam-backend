@@ -33,7 +33,7 @@ export class OrdersController {
 
   @Get()
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   findAll() {
     return this.ordersService.findAll();
   }
@@ -48,21 +48,21 @@ export class OrdersController {
 
   @Get(':id')
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(+id);
   }
 
   @Put(':id')
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     return this.ordersService.update(+id, updateOrderDto);
   }
 
   @Delete(':id')
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   remove(@Param('id') id: string) {
     return this.ordersService.remove(+id);
   }

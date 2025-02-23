@@ -28,7 +28,7 @@ export class RoleGuard extends AuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-
+    
     if (!requiredRoles.includes(user.role)) {
       throw new ForbiddenException('Huquqingiz yetarli emas');
     }

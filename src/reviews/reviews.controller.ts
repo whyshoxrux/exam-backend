@@ -15,8 +15,6 @@ export class ReviewsController {
   }
 
   @Post('create-many')
-    @Roles('admin')
-    @UseGuards(RoleGuard)
     createMany(@Body() createUserDto: CreateReviewDto[]) {
       return this.reviewsService.createMany(createUserDto);
     }

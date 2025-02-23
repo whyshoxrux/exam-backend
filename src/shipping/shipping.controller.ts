@@ -13,13 +13,13 @@ import { ShippingService } from './shipping.service';
 import { CreateShippingDto } from './dto/create-shipping.dto';
 import { UpdateShippingDto } from './dto/update-shipping.dto';
 import { Roles } from 'src/common/auth/role.decorator';
-import { RoleGuard } from 'src/common/auth/role.guard';
+import { AuthGuard } from 'src/common/auth/auth.guard';
 
 @Controller('shipping')
 export class ShippingController {
   constructor(private readonly shippingService: ShippingService) {}
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @Post()
   create(@Body() createShippingDto: CreateShippingDto) {
     return this.shippingService.create(createShippingDto);
@@ -27,20 +27,20 @@ export class ShippingController {
 
   @Post('create-many')
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   createMany(@Body() createUserDto: CreateShippingDto[]) {
     return this.shippingService.createMany(createUserDto);
   }
 
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @Get()
   findAll() {
     return this.shippingService.findAll();
   }
 
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.shippingService.findOne(+id);
@@ -48,7 +48,7 @@ export class ShippingController {
 
   @Put(':id')
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   update(
     @Param('id') id: string,
     @Body() updateShippingDto: UpdateShippingDto,
@@ -58,7 +58,7 @@ export class ShippingController {
 
   @Delete(':id')
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   remove(@Param('id') id: string) {
     return this.shippingService.remove(+id);
   }

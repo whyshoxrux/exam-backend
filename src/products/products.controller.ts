@@ -21,14 +21,12 @@ import { AuthGuard } from 'src/common/auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { RoleGuard } from 'src/common/auth/role.guard';
 import { Roles } from 'src/common/auth/role.decorator';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @UseGuards(AuthGuard)
   @Post()
   @UseInterceptors(
     FileInterceptor('product_image', {
@@ -43,9 +41,11 @@ export class ProductsController {
         },
       }),
       fileFilter: (req, file, callback) => {
-        if (!file.mimetype.match(/^image\/(jpeg|jpg|png|webp)$/)) {
+        if (!/^image\/(jpeg|jpg|png|webp)$/.test(file.mimetype)) {
           return callback(
-            new BadRequestException('Only jpg, jpeg, png files are allowed!'),
+            new BadRequestException(
+              'Only JPG, JPEG, PNG, and WEBP files are allowed!',
+            ),
             false,
           );
         }
@@ -56,7 +56,6 @@ export class ProductsController {
   async uploadProductPicture(
     @UploadedFile() image: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
-    @Req() req,
   ) {
     try {
       if (!image) {
@@ -65,26 +64,23 @@ export class ProductsController {
 
       createProductDto.product_image = `/uploads/${image.filename}`;
 
-      const userId = req.user?.id;
-      if (!userId) {
-        throw new BadRequestException('User ID not found');
-      }
-
-      // Mahsulotni saqlash
       const savedProduct = await this.productsService.create(createProductDto);
 
       return {
-        message: 'Product image uploaded successfully',
+        message: 'Product created successfully!',
         product: savedProduct,
       };
     } catch (error) {
-      throw new BadRequestException(`Error uploading image: ${error.message}`);
+      console.error('Upload Error:', error);
+      throw new BadRequestException(
+        `Error uploading product: ${error?.message || 'Unknown error'}`,
+      );
     }
   }
 
   @Post('create-many')
-  // @Roles('admin')
-  // @UseGuards(RoleGuard)
+  @Roles('admin')
+  @UseGuards(AuthGuard)
   createMany(@Body() createProductDto: CreateProductDto[]) {
     return this.productsService.createMany(createProductDto);
   }
@@ -94,20 +90,13 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
-  @Get('mine')
-  async getMine(@Req() req) {
-    const product_id = req.user.id;
-    return this.productsService.getMine(product_id);
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(+id);
   }
 
-  @UseGuards(AuthGuard)
   @Roles('admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @Put(':id')
   @UseInterceptors(
     FileInterceptor('product_image', {
@@ -122,39 +111,44 @@ export class ProductsController {
         },
       }),
       fileFilter: (req, file, callback) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-          return callback(new Error('Only image files are allowed!'), false);
+        if (!/^image\/(jpeg|jpg|png|gif)$/i.test(file.mimetype)) {
+          return callback(
+            new BadRequestException('Only image files are allowed!'),
+            false,
+          );
         }
         callback(null, true);
       },
     }),
   )
   async update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() updateProductDto: UpdateProductDto,
-    @Req() req,
   ) {
     try {
-      // Mahsulotni bazadan olish
-      const existingProduct = await this.productsService.findOne(id);
-      if (!existingProduct) {
-        return { message: 'Product not found' };
+      const productId = parseInt(id, 10);
+      if (isNaN(productId)) {
+        throw new BadRequestException('Invalid product ID');
       }
 
-      let product_picture = existingProduct.product_image; // Eski rasm
+      const existingProduct = await this.productsService.findOne(productId);
+      if (!existingProduct) {
+        throw new BadRequestException('Product not found');
+      }
+
+      let product_picture = existingProduct.product_image;
 
       if (file) {
-        product_picture = '/uploads/' + file.filename;
+        product_picture = `/uploads/${file.filename}`;
 
-        // ✅ **Eski rasmni o‘chirish**
         if (
           existingProduct.product_image &&
           existingProduct.product_image !== '/uploads/default.png'
         ) {
-          const oldImagePath = `.${existingProduct.product_image}`; // Faylga to'liq yo‘l
+          const oldImagePath = `.${existingProduct.product_image}`;
           try {
-            await fs.unlink(oldImagePath); // Faylni o‘chirish
+            await fs.unlink(oldImagePath);
           } catch (unlinkError) {
             console.error('Failed to delete old image:', unlinkError.message);
           }
@@ -166,21 +160,29 @@ export class ProductsController {
         product_image: product_picture,
       };
 
-      const updatedProduct = await this.productsService.update(id, updatedData);
+      const updatedProduct = await this.productsService.update(
+        productId,
+        updatedData,
+      );
 
       return {
         message: 'Product image updated successfully',
         updatedProduct,
       };
     } catch (error) {
-      return { message: 'Error updating product image', error: error.message };
+      console.error('Update Error:', error);
+      throw new BadRequestException(`Error updating product: ${error.message}`);
     }
   }
 
   @Delete(':id')
   @Roles('admin')
-  @UseGuards(RoleGuard)
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  @UseGuards(AuthGuard)
+  async remove(@Param('id') id: string) {
+    const productId = parseInt(id, 10);
+    if (isNaN(productId)) {
+      throw new BadRequestException('Invalid product ID');
+    }
+    return this.productsService.remove(productId);
   }
 }

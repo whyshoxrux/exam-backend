@@ -26,20 +26,6 @@ export class ProductsService {
     return await this.productsModel.bulkCreate(createProductDto as any);
   }
 
-  async getMine(id: any) {
-    if (!id || isNaN(Number(id))) {
-      throw new BadRequestException('Yaroqli ID kiriting');
-    }
-    return this.productsModel.findByPk(id, {
-      include: [
-        { model: Categories },
-        { model: OrderItems },
-        { model: CartItem },
-        { model: Reviews },
-      ],
-    });
-  }
-
   findAll() {
     return this.productsModel.findAll({
       include: [

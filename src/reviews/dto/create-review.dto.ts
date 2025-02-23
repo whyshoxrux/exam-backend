@@ -2,7 +2,6 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateReviewDto {
   @IsNumber()
-  @IsNotEmpty()
   user_id: number;
 
   @IsNumber()

@@ -12,7 +12,7 @@ import { CartItem } from 'src/cart-item/cartItem.model';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Products, OrderItems, CartItem]),
+    SequelizeModule.forFeature([Products, OrderItems, CartItem, Reviews]),
     SharingModule,
     Reviews,
   ],

@@ -1,14 +1,19 @@
-import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { Products } from 'src/products/products.model';
 import { User } from 'src/users/users.model';
 
 @Table({ tableName: 'reviews' })
 export class Reviews extends Model<Reviews> {
-  
   @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
   })
   user_id: number;
 
@@ -32,8 +37,8 @@ export class Reviews extends Model<Reviews> {
   comment: string;
 
   @BelongsTo(() => User)
-  user: User
+  user: User;
 
-  @BelongsTo(() => Products)
-  product: Products
+  @BelongsTo(() => Products, { onDelete: 'CASCADE' })
+  product: Products;
 }

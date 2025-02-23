@@ -4,6 +4,7 @@ import { UpdateReviewDto } from './dto/update-review.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Reviews } from './reviews.model';
 import { User } from 'src/users/users.model';
+import { Products } from 'src/products/products.model';
 
 @Injectable()
 export class ReviewsService {
@@ -18,11 +19,15 @@ export class ReviewsService {
   }
 
   findAll() {
-    return this.reviewModel.findAll({ include: { model: User } });
+    return this.reviewModel.findAll({
+      include: [{ model: User }, { model: Products }],
+    });
   }
 
   findOne(id: number) {
-    return this.reviewModel.findByPk(id, { include: { model: User } });
+    return this.reviewModel.findByPk(id, {
+      include: [{ model: User }, { model: Products }],
+    });
   }
 
   update(id: number, updateReviewDto: UpdateReviewDto) {

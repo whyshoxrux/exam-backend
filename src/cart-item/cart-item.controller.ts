@@ -1,9 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Put,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { CartItemsService } from './cart-item.service';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { Roles } from 'src/common/auth/role.decorator';
 import { RoleGuard } from 'src/common/auth/role.guard';
+import { AuthGuard } from 'src/common/auth/auth.guard';
 
 @Controller('cart-item')
 export class CartItemController {
@@ -15,8 +27,8 @@ export class CartItemController {
   }
 
   @Post('create-many')
-  // @Roles('admin')
-  // @UseGuards(RoleGuard)
+  @Roles('admin')
+  @UseGuards(AuthGuard)
   createMany(@Body() createUserDto: CreateCartItemDto[]) {
     return this.cartItemsService.createMany(createUserDto);
   }
@@ -32,7 +44,10 @@ export class CartItemController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCartItemDto: UpdateCartItemDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCartItemDto: UpdateCartItemDto,
+  ) {
     return this.cartItemsService.update(+id, updateCartItemDto);
   }
 

@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { Roles } from 'src/common/auth/role.decorator';
 import { RoleGuard } from 'src/common/auth/role.guard';
+import { AuthGuard } from 'src/common/auth/auth.guard';
 
 @Controller('cart')
 export class CartController {
@@ -15,8 +26,8 @@ export class CartController {
   }
 
   @Post('create-many')
-  // @Roles('admin')
-  // @UseGuards(RoleGuard)
+  @Roles('admin')
+  @UseGuards(AuthGuard)
   createMany(@Body() createUserDto: CreateCartDto[]) {
     return this.cartService.createMany(createUserDto);
   }
