@@ -26,9 +26,67 @@ module.exports = {
         allowNull: false
       },
       role: {
-        type: Sequelize.ENUM('user', 'admin'), // Role uchun enum
+        type: Sequelize.ENUM('user', 'admin'),
         allowNull: false,
         defaultValue: 'user'
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false
+      }
+    });
+
+    // Categories jadvali
+    await queryInterface.createTable('categories', {
+      category_id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      category_name: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false
+      }
+    });
+
+    // Products jadvali
+    await queryInterface.createTable('products', {
+      product_id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      product_name: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      price: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      description: {
+        type: Sequelize.TEXT
+      },
+      category_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'categories',
+          key: 'category_id'
+        },
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -251,64 +309,6 @@ module.exports = {
       }
     });
 
-    // Categories jadvali
-    await queryInterface.createTable('categories', {
-      category_id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-      },
-      category_name: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      createdAt: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      updatedAt: {
-        type: Sequelize.DATE,
-        allowNull: false
-      }
-    });
-
-    // Products jadvali
-    await queryInterface.createTable('products', {
-      product_id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-      },
-      product_name: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      price: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      description: {
-        type: Sequelize.TEXT
-      },
-      category_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'categories',
-          key: 'category_id'
-        },
-        onDelete: 'SET NULL',
-        onUpdate: 'CASCADE'
-      },
-      createdAt: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      updatedAt: {
-        type: Sequelize.DATE,
-        allowNull: false
-      }
-    });
-
     // Reviews jadvali
     await queryInterface.createTable('reviews', {
       review_id: {
@@ -353,16 +353,16 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    // Jadvallarni o‘chirish tartibini bog‘lanishlar hisobga olgan holda teskari tartibda bajaradi
+    // Jadvallarni teskari tartibda o‘chirish (foreign key constraints buzilmasligi uchun)
     await queryInterface.dropTable('reviews');
-    await queryInterface.dropTable('products');
-    await queryInterface.dropTable('categories');
     await queryInterface.dropTable('shipping');
-    await queryInterface.dropTable('cart_items');
     await queryInterface.dropTable('cart');
+    await queryInterface.dropTable('cart_items');
     await queryInterface.dropTable('payments');
     await queryInterface.dropTable('order_items');
     await queryInterface.dropTable('orders');
+    await queryInterface.dropTable('products');
+    await queryInterface.dropTable('categories');
     await queryInterface.dropTable('users');
   }
 };
