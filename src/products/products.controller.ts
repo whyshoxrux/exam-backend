@@ -22,6 +22,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Roles } from 'src/common/auth/role.decorator';
+import { RoleGuard } from 'src/common/auth/role.guard';
 
 @Controller('products')
 export class ProductsController {
@@ -41,6 +42,9 @@ export class ProductsController {
         },
       }),
       fileFilter: (req, file, callback) => {
+        if (!file) {
+          return callback(null, true); // Agar fayl yo'q bo'lsa, xatolik qaytarmaslik uchun
+        }
         if (!/^image\/(jpeg|jpg|png|webp)$/.test(file.mimetype)) {
           return callback(
             new BadRequestException(
@@ -58,11 +62,10 @@ export class ProductsController {
     @Body() createProductDto: CreateProductDto,
   ) {
     try {
-      if (!image) {
-        throw new BadRequestException('No file provided!');
-      }
-
-      createProductDto.product_image = `/uploads/${image.filename}`;
+      // Agar rasm yuklanmagan bo'lsa, default_image.png dan foydalanamiz
+      createProductDto.product_image = image
+        ? `/uploads/${image.filename}`
+        : '/uploads/default_image.png';
 
       const savedProduct = await this.productsService.create(createProductDto);
 
@@ -80,7 +83,7 @@ export class ProductsController {
 
   @Post('create-many')
   @Roles('admin')
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
   createMany(@Body() createProductDto: CreateProductDto[]) {
     return this.productsService.createMany(createProductDto);
   }

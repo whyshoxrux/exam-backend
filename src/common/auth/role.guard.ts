@@ -4,9 +4,9 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { AuthGuard } from './auth.guard';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '../config/config.service';
+import { AuthGuard } from './auth.guard';
 
 @Injectable()
 export class RoleGuard extends AuthGuard implements CanActivate {
@@ -28,7 +28,9 @@ export class RoleGuard extends AuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    
+
+    console.log(requiredRoles, user);
+
     if (!requiredRoles.includes(user.role)) {
       throw new ForbiddenException('Huquqingiz yetarli emas');
     }

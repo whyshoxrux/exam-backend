@@ -23,7 +23,7 @@ export class ProductsService {
   }
 
   async createMany(createProductDto: CreateProductDto[]) {
-    return await this.productsModel.bulkCreate(createProductDto as any);
+    return await this.productsModel.bulkCreate(createProductDto as unknown as CreateProductDto[]);
   }
 
   findAll() {
