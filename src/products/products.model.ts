@@ -1,10 +1,12 @@
 import {
+  AutoIncrement,
   BelongsTo,
   Column,
   DataType,
   ForeignKey,
   HasMany,
   Model,
+  PrimaryKey,
   Table,
 } from 'sequelize-typescript';
 import { CartItem } from 'src/cart-item/cartItem.model';
@@ -16,6 +18,8 @@ import { Reviews } from 'src/reviews/reviews.model';
 
 @Table({ tableName: 'products' })
 export class Products extends Model<Products> {
+
+
   @Column({
     type: DataType.STRING,
     allowNull: false,
@@ -25,7 +29,7 @@ export class Products extends Model<Products> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    defaultValue: '/uploads/default_product.jpg'
+    defaultValue: '/uploads/default_product.jpg',
   })
   product_image: string;
 

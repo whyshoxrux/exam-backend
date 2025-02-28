@@ -36,15 +36,15 @@ export class UsersController {
   }
 
   @Post('create-many')
-  @Roles('admin')
-  @UseGuards(AuthGuard)
+  // @Roles('admin')
+  // @UseGuards(AuthGuard)
   createMany(@Body() createUserDto: CreateUserDto[]) {
     return this.usersService.createMany(createUserDto);
   }
 
   @Get()
-  @Roles('admin')
-  @UseGuards(AuthGuard)
+  // @Roles('admin')
+  // @UseGuards(AuthGuard)
   findAll() {
     return this.usersService.findAll();
   }

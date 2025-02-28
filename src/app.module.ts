@@ -25,7 +25,7 @@ import { join } from 'path';
       username: 'postgres',
       password: '123456',
       autoLoadModels: true,
-      synchronize: false,
+      synchronize: true,
       // sync: { force: true },
     }),
     ServeStaticModule.forRoot({

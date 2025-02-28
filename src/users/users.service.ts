@@ -19,8 +19,10 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = await this.userModel.create(createUserDto);
-    console.log(createUserDto);
+    const salt = await bcrypt.genSalt(10);
+    createUserDto.password = await bcrypt.hash(createUserDto.password, salt);
+
+    const user = await this.userModel.create({ ...createUserDto } as User);
     return user;
   }
 
@@ -32,13 +34,13 @@ export class UsersService {
     const { email, password } = loginDto;
     const user = await this.userModel.findOne({ where: { email } });
 
-    console.log(user);
-
-    // User ni bor yoki yo'qligi tekshirildi! Abdurazzoq :)
-    if (user == null || user.password != password)
+    if (user == null || !(await bcrypt.compare(password, user.password)))
       throw new NotFoundException({ message: 'User not found', status: 404 });
 
-    const accessToken = this.generateAccessToken({ id: user.id });
+    const accessToken = this.generateAccessToken({
+      id: user.id,
+      role: user.role,
+    });
 
     return { accessToken, user, status: 200 };
   }

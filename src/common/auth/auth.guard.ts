@@ -5,12 +5,12 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '../config/config.service';
 import * as jwt from 'jsonwebtoken';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) { }
 
   canActivate(context: ExecutionContext): boolean {
     try {
@@ -22,18 +22,24 @@ export class AuthGuard implements CanActivate {
       }
 
       const secret = this.configService.get('JWT_ACCESS_SECRET');
+
       if (!secret) {
         throw new Error('JWT_ACCESS_SECRET aniqlanmagan');
       }
 
       const result = jwt.verify(token, secret);
+
       if (!result || !result['data']) {
         throw new UnauthorizedException('Token noto‘g‘ri');
       }
 
+      request.user = result['data']
+
       return true;
+
     } catch (error) {
       console.log('AuthGuard xatosi:', error.message);
+
       throw new ForbiddenException('Token eskirgan yoki noto‘g‘ri');
     }
   }
